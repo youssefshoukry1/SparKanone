@@ -7,20 +7,20 @@ export default function HeroMotion() {
 
   useEffect(() => {
     const canvas = ref.current;
-    const hero = canvas?.closest("section");
+    const hero = canvas?.closest<HTMLElement>(".hero");
+    const cannon = hero?.querySelector(".hero-logo");
     const ctx = canvas?.getContext("2d");
-    if (!hero || !canvas || !ctx) return;
+    if (!canvas || !ctx || !hero || !cannon) return;
 
-    const preference = matchMedia("(any-hover: hover) and (any-pointer: fine) and (prefers-reduced-motion: no-preference)");
+    const preference = matchMedia("(prefers-reduced-motion: no-preference)");
     function listen() {
-      if (!preference.matches || !hero || !canvas || !ctx) return;
+      if (!preference.matches || !canvas || !ctx || !hero || !cannon) return;
       const surface = canvas;
       const context = ctx;
-      const section = hero;
+      const cannonImage = cannon;
       const lifetime = 850;
       const points: { x: number; y: number; time: number; angle: number }[] = [];
       const notes: { x: number; y: number; time: number; vx: number; vy: number; spin: number; scale: number }[] = [];
-      let lastEmission = -Infinity;
       const noteLifetime = 1050;
       const stamp = document.createElement("canvas");
       stamp.width = 80;
@@ -46,8 +46,8 @@ export default function HeroMotion() {
       let previous: { x: number; y: number } | undefined;
 
       function resize() {
-        surface.width = Math.round(section.clientWidth);
-        surface.height = Math.round(section.clientHeight);
+        surface.width = surface.clientWidth;
+        surface.height = surface.clientHeight;
       }
       function paint(time: number) {
         context.clearRect(0, 0, surface.width, surface.height);
@@ -68,7 +68,7 @@ export default function HeroMotion() {
         for (const note of notes) {
           const age = Math.max(0, (time - note.time) / noteLifetime);
           context.save();
-          context.translate(note.x + note.vx * age, note.y + note.vy * age + 96 * age * age);
+          context.translate(note.x + note.vx * age, note.y + note.vy * age);
           context.rotate(note.spin * (0.15 + age));
           context.scale(note.scale, note.scale * (0.35 + 0.65 * Math.abs(Math.cos(age * 7 + note.spin))));
           context.globalAlpha = Math.min(1, (1 - age) * 2);
@@ -77,53 +77,61 @@ export default function HeroMotion() {
         }
         frame = points.length || notes.length ? requestAnimationFrame(paint) : 0;
       }
+      function fire() {
+        const artwork = cannonImage.getBoundingClientRect();
+        if (document.hidden || !artwork.width || !artwork.height ||
+            artwork.bottom <= 0 || artwork.top >= window.innerHeight) return;
+
+        const bounds = surface.getBoundingClientRect();
+        // The front of the muzzle is at 67% across and 32% down the artwork.
+        const x = artwork.left - bounds.left + artwork.width * 0.67;
+        const y = artwork.top - bounds.top + artwork.height * 0.32;
+        const now = performance.now();
+        for (let i = 0; i < 20; i++) {
+          const angle = -0.85 + Math.random() * 0.65;
+          const speed = 120 + Math.random() * 180;
+          notes.push({
+            x, y, time: now,
+            vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+            spin: (Math.random() - 0.5) * 4,
+            scale: (0.65 + Math.random() * 0.45) * Math.min(1, artwork.width / 400),
+          });
+        }
+        if (!frame) frame = requestAnimationFrame(paint);
+      }
       function move(event: PointerEvent) {
-        if (event.pointerType === "touch") return;
-        const rect = section.getBoundingClientRect();
+        if (!hero || event.pointerType === "touch") return;
+        const rect = hero.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         const dx = x - (previous?.x ?? x);
         const dy = y - (previous?.y ?? y);
-        const now = performance.now();
-        const pause = now - lastEmission;
-        if (pause >= 38) {
-          const count = pause > 220 ? 12 : 3;
-          for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = 45 + Math.random() * 100;
-            notes.push({
-              x: x + Math.cos(angle) * 12, y: y + Math.sin(angle) * 12, time: now,
-              vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 55,
-              spin: (Math.random() - 0.5) * 4, scale: 0.65 + Math.random() * 0.5,
-            });
-          }
-          if (notes.length > 72) notes.splice(0, notes.length - 72);
-          lastEmission = now;
-        }
         if (!previous || Math.hypot(dx, dy) >= 7) {
           points.push({ x, y, angle: Math.atan2(dy, dx), time: performance.now() });
           if (points.length > 36) points.shift();
           previous = { x, y };
         }
-        section.style.setProperty("--hero-x", `${(x / rect.width - 0.5) * 18}px`);
-        section.style.setProperty("--hero-y", `${(y / rect.height - 0.5) * 14}px`);
+        hero.style.setProperty("--hero-x", `${(x / rect.width - 0.5) * 18}px`);
+        hero.style.setProperty("--hero-y", `${(y / rect.height - 0.5) * 14}px`);
         if (!frame) frame = requestAnimationFrame(paint);
       }
       function leave() {
         previous = undefined;
-        lastEmission = -Infinity;
-        section.style.removeProperty("--hero-x");
-        section.style.removeProperty("--hero-y");
+        hero?.style.removeProperty("--hero-x");
+        hero?.style.removeProperty("--hero-y");
       }
       resize();
       const observer = new ResizeObserver(resize);
-      observer.observe(section);
-      section.addEventListener("pointermove", move);
-      section.addEventListener("pointerleave", leave);
+      observer.observe(surface);
+      hero.addEventListener("pointermove", move, { passive: true });
+      hero.addEventListener("pointerleave", leave);
+      const firingTimer = window.setInterval(fire, 1900);
+      fire();
       return () => {
         observer.disconnect();
-        section.removeEventListener("pointermove", move);
-        section.removeEventListener("pointerleave", leave);
+        hero.removeEventListener("pointermove", move);
+        hero.removeEventListener("pointerleave", leave);
+        window.clearInterval(firingTimer);
         cancelAnimationFrame(frame);
         context.clearRect(0, 0, surface.width, surface.height);
         leave();

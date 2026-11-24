@@ -4,6 +4,7 @@ import { HeroLogo } from "../components/HomeArtwork";
 import HeroMotion from "../components/HeroMotion";
 import { concepts } from "../content/home";
 import OfferSteps from "../components/OfferSteps";
+import SavingsCalculator from "../components/SavingsCalculator";
 import { GroceryStory, ShoppingStory, TravelStory, StoryOverview, ReceiptGuide, PrizeDrawGuide } from "../components/SavingsStories";
 
 const icons = [BadgePercent, Wallet, Ticket];
@@ -36,6 +37,7 @@ export default function Home() {
     <TravelStory />
     <PrizeDrawGuide />
     <HomeFaq />
+    <SavingsCalculator />
     <section className="closing"><div className="wrap"><h2>Was steckt hinter<br />dem Sparvorteil?</h2><a className="button" href="#vorteile">Sparvorteile vergleichen</a></div></section>
   </main>;
 }
