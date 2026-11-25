@@ -1,4 +1,5 @@
 import Image from "next/image";
+import * as motion from "motion/react-client";
 import { BedDouble, BusFront, Luggage, Plane } from "lucide-react";
 import groceries from "../images/groceries.webp";
 import groceriesMobile from "../images/groceries-mobile.webp";
@@ -53,19 +54,34 @@ export function StoryOverview() {
 
 export function GroceryStory() {
   return (
-    <section className="wrap grocery-story" aria-labelledby="einkauf">
+    <motion.section
+      className="wrap grocery-story motion-reduce:transform-none! motion-reduce:opacity-100!"
+      aria-labelledby="einkauf"
+      initial={{ x: "-3%", opacity: 0 }}
+      whileInView={{ x: "0%", opacity: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.65, ease: "easeOut" }}
+    >
       <StoryPhoto photo={groceries} mobile={groceriesMobile} alt="Zwei Menschen wählen in der Obstabteilung eines Supermarkts Äpfel aus." />
       <div className="grocery-copy">
         <h2 id="einkauf">Was bleibt nach dem Einkauf übrig?</h2>
         <p>Auf dem Kassenbon sehen Sie, welche Rabatte abgezogen wurden. Vergleichen Sie den Betrag mit Ihrem Wochenbudget.</p>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
 export function ShoppingStory() {
   return (
-    <section id="online-einkauf" className="wrap shopping-story" aria-labelledby="voucher-title">
+    <motion.section
+      id="online-einkauf"
+      className="wrap shopping-story motion-reduce:transform-none! motion-reduce:opacity-100!"
+      aria-labelledby="voucher-title"
+      initial={{ x: "3%", opacity: 0 }}
+      whileInView={{ x: "0%", opacity: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.65, ease: "easeOut" }}
+    >
       <div className="voucher-face">
         <h2 id="voucher-title">Was bleibt vom<br />5‑€‑Gutschein?</h2>
         <p>Die gleiche Tasse kostet im Laden und online 30 €. Beim Onlinekauf fallen 4 € Versand an.</p>
@@ -80,19 +96,43 @@ export function ShoppingStory() {
             <div className="total"><dt>Gesamtpreis</dt><dd>29 €</dd></div>
           </dl>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
 export function TravelStory() {
   return (
-    <section className="wrap travel-story" aria-labelledby="kurztrip">
+    <motion.section
+      className="wrap travel-story motion-reduce:transform-none! motion-reduce:opacity-100!"
+      aria-labelledby="kurztrip"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={{
+        hidden: { opacity: 0, scale: 0.95 },
+        visible: { opacity: 1, scale: 1, transition: { duration: 0.8, ease: "easeOut" } },
+      }}
+    >
       <header className="trip-heading">
-        <Image className="trip-photo" src={travelMobile} width={120} height={120} alt="" unoptimized />
-        <div>
+        <motion.div
+          className="trip-photo motion-reduce:transform-none! motion-reduce:opacity-100!"
+          variants={{
+            hidden: { opacity: 0, scale: 0.86, rotate: -10 },
+            visible: { opacity: 1, scale: 1, rotate: 0, transition: { duration: 0.6, delay: 0.2, ease: "easeOut" } },
+          }}
+        >
+          <Image src={travelMobile} width={120} height={120} alt="" unoptimized />
+        </motion.div>
+        <motion.div
+          className="motion-reduce:transform-none! motion-reduce:opacity-100!"
+          variants={{
+            hidden: { opacity: 0, y: 14 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.3, ease: "easeOut" } },
+          }}
+        >
           <h2 id="kurztrip">Was kostet der Kurztrip insgesamt?</h2>
           <p>Vergleichen Sie vor der Buchung, was Sie für die ganze Reise bezahlen.</p>
-        </div>
+        </motion.div>
       </header>
       <dl className="trip-costs">
         {[
@@ -100,17 +140,50 @@ export function TravelStory() {
           { Icon: Luggage, label: "Gepäck", text: "Ist Ihr Koffer im gewählten Tarif enthalten?" },
           { Icon: BusFront, label: "Transfer", text: "Was kosten die Fahrten zum Hotel und zurück?" },
           { Icon: BedDouble, label: "Unterkunft", text: "Wie viel zahlen Sie für alle Nächte inklusive Gebühren?" },
-        ].map(({ Icon, label, text }) => (
-          <div key={label}><dt><Icon aria-hidden="true" size={22} />{label}</dt><dd>{text}</dd></div>
-        ))}
+        ].map(({ Icon, label, text }, index) => {
+          const delay = 0.4 + index * 0.15;
+          return (
+            <motion.div
+              key={label}
+              className="trip-item motion-reduce:transform-none! motion-reduce:opacity-100!"
+              variants={{
+                hidden: { opacity: 0, y: 20, "--trip-swing": "paused" },
+                visible: {
+                  opacity: 1, y: 0,
+                  transition: { duration: 0.5, delay, ease: "easeOut" },
+                  transitionEnd: { "--trip-swing": "running" },
+                },
+              }}
+            >
+              <motion.span
+                className="trip-divider motion-reduce:transform-none!"
+                aria-hidden="true"
+                variants={{
+                  hidden: { scaleX: 0 },
+                  visible: { scaleX: 1, transition: { duration: 0.6, delay, ease: "easeOut" } },
+                }}
+              />
+              <dt><span className="trip-icon" aria-hidden="true"><Icon size={22} /></span>{label}</dt>
+              <dd>{text}</dd>
+            </motion.div>
+          );
+        })}
       </dl>
-    </section>
+    </motion.section>
   );
 }
 
 export function ReceiptGuide() {
   return (
-    <section id="kassenbon" aria-labelledby="bon-titel" className="wrap receipt-guide">
+    <motion.section
+      id="kassenbon"
+      aria-labelledby="bon-titel"
+      className="wrap receipt-guide motion-reduce:transform-none! motion-reduce:opacity-100!"
+      initial={{ x: "3%", opacity: 0 }}
+      whileInView={{ x: "0%", opacity: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.65, ease: "easeOut" }}
+    >
       <div>
         <h2 id="bon-titel">Wenn der Kassenbon als Nachweis zählt</h2>
         <p>Manche Cashback-Aktionen verlangen einen Kaufbeleg. Ein Blick in die Aktionsbedingungen vor dem Einkauf erspart Ihnen später die Suche nach dem richtigen Nachweis.</p>
@@ -121,23 +194,69 @@ export function ReceiptGuide() {
         </ul>
       </div>
       <StoryPhoto photo={receipt} mobile={receiptMobile} alt="Eine Käuferin fotografiert ihren Kassenbon mit dem Smartphone." />
-    </section>
+    </motion.section>
   );
 }
 
+const drawQuestions = [
+  ["Wer darf mitmachen?", "Achten Sie auf Mindestalter, Wohnort und eine mögliche Mitgliedschaft."],
+  ["Was umfasst der Gewinn?", "Bei einer verlosten Reise können etwa Anreise oder Verpflegung extra kosten."],
+  ["Wann fällt die Entscheidung?", "Suchen Sie nach Teilnahmeschluss, Auslosung und dem Weg, auf dem Gewinner benachrichtigt werden."],
+] as const;
+
+const drawEase = [0.22, 1, 0.36, 1] as const;
+
 export function PrizeDrawGuide() {
   return (
-    <section id="gewinnspiele" aria-labelledby="los-titel" className="wrap draw-guide">
-      <StoryPhoto photo={draw} mobile={drawMobile} alt="Eine Frau zieht bei einer Verlosung ein gefaltetes Los aus einer Glasschale." />
+    <motion.section
+      id="gewinnspiele"
+      aria-labelledby="los-titel"
+      className="wrap draw-guide motion-reduce:transform-none! motion-reduce:opacity-100!"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={{
+        hidden: { opacity: 0, scale: 0.95 },
+        visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: drawEase } },
+      }}
+    >
+      <motion.figure
+        className="draw-photo motion-reduce:transform-none! motion-reduce:opacity-100!"
+        variants={{
+          hidden: { opacity: 0, x: -28 },
+          visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: drawEase } },
+        }}
+      >
+        <StoryPhoto photo={draw} mobile={drawMobile} alt="Eine Frau zieht bei einer Verlosung ein gefaltetes Los aus einer Glasschale." />
+      </motion.figure>
       <div>
-        <h2 id="los-titel">Was steckt im Lostopf?</h2>
+        <motion.h2
+          id="los-titel"
+          className="motion-reduce:transform-none! motion-reduce:opacity-100!"
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.2, ease: drawEase } },
+          }}
+        >
+          Was steckt im Lostopf?
+        </motion.h2>
         <p>Bei einem Gewinnspiel lohnt sich ein Blick ins Kleingedruckte. Diese drei Fragen helfen bei der Entscheidung.</p>
         <dl className="draw-questions">
-          <dt>Wer darf mitmachen?</dt><dd>Achten Sie auf Mindestalter, Wohnort und eine mögliche Mitgliedschaft.</dd>
-          <dt>Was umfasst der Gewinn?</dt><dd>Bei einer verlosten Reise können etwa Anreise oder Verpflegung extra kosten.</dd>
-          <dt>Wann fällt die Entscheidung?</dt><dd>Suchen Sie nach Teilnahmeschluss, Auslosung und dem Weg, auf dem Gewinner benachrichtigt werden.</dd>
+          {drawQuestions.map(([question, answer], index) => (
+            <motion.div
+              key={question}
+              className="motion-reduce:transform-none! motion-reduce:opacity-100!"
+              variants={{
+                hidden: { opacity: 0, x: 18 },
+                visible: { opacity: 1, x: 0, transition: { duration: 0.75, delay: 0.35 + index * 0.15, ease: drawEase } },
+              }}
+            >
+              <dt>{question}</dt>
+              <dd>{answer}</dd>
+            </motion.div>
+          ))}
         </dl>
       </div>
-    </section>
+    </motion.section>
   );
 }

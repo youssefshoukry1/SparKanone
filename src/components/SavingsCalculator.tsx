@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 const rates = [3, 5] as const;
@@ -19,6 +19,10 @@ export default function SavingsCalculator() {
   const [spending, setSpending] = useState(2000);
   const [rate, setRate] = useState<(typeof rates)[number]>(3);
   const annualCashback = spending * rate * 12 / 100;
+  const spendingProgress = (spending - minSpending) / (maxSpending - minSpending) * 100;
+  const trackStyle = {
+    "--spending-track": `linear-gradient(to right, #ADD266 ${spendingProgress}%, #D4DBCC ${spendingProgress}%)`,
+  } as CSSProperties;
 
   return (
     <section className="pt-3 pb-16 text-[#0B2F1D]" aria-labelledby={`${id}-title`}>
@@ -40,7 +44,8 @@ export default function SavingsCalculator() {
                 <span className="tabular-nums" aria-hidden="true">{euros.format(spending)}</span>
               </div>
               <input
-                className="my-1 block h-11 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-[#ADD266] [&::-webkit-slider-thumb]:-mt-2 [&::-webkit-slider-thumb]:size-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#0B2F1D] [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-[#ADD266] [&::-moz-range-thumb]:size-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-[#0B2F1D]"
+                className="my-1 block h-11 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:[background:var(--spending-track)] [&::-webkit-slider-thumb]:-mt-2 [&::-webkit-slider-thumb]:size-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#0B2F1D] [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:[background:var(--spending-track)] [&::-moz-range-thumb]:size-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-[#0B2F1D]"
+                style={trackStyle}
                 id={`${id}-spending`}
                 type="range"
                 min={minSpending}

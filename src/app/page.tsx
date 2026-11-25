@@ -1,13 +1,11 @@
-import { BadgePercent, Wallet, Ticket } from "lucide-react";
 import HomeFaq from "../components/HomeFaq";
 import { HeroLogo } from "../components/HomeArtwork";
 import HeroMotion from "../components/HeroMotion";
-import { concepts } from "../content/home";
+import SavingsConcepts from "../components/SavingsConcepts";
 import OfferSteps from "../components/OfferSteps";
 import SavingsCalculator from "../components/SavingsCalculator";
 import { GroceryStory, ShoppingStory, TravelStory, StoryOverview, ReceiptGuide, PrizeDrawGuide } from "../components/SavingsStories";
 
-const icons = [BadgePercent, Wallet, Ticket];
 
 export default function Home() {
   const explainerVideo = process.env.EXPLAINER_VIDEO_URL;
@@ -29,9 +27,7 @@ export default function Home() {
     <ShoppingStory />
     <GroceryStory />
     <ReceiptGuide />
-    <section className="section tint"><div className="wrap"><h2>Drei Arten zu sparen</h2><p>Diese Begriffe begegnen Ihnen beim Vergleich von Angeboten.</p>
-      <div className="cards">{concepts.map((item, index) => { const Icon = icons[index]; return <article key={item.title}><Icon className="card-icon" aria-hidden="true" /><h3>{item.title}</h3><p>{item.text}</p></article>; })}</div>
-    </div></section>
+    <SavingsConcepts />
     <section className="section" id="ablauf"><div className="wrap split"><h2>So prüfen Sie<br />ein Angebot</h2><OfferSteps /></div></section>
     <section className="wrap example"><h2>Warum SparKanone?</h2><p>Wir erklären Sparbegriffe anhand von Alltagssituationen. So können Sie selbst einschätzen, ob sich ein Angebot für Sie lohnt.</p></section>
     <TravelStory />
