@@ -1,56 +1,46 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+﻿import { CalendarClock, ListChecks, ShoppingCart } from "lucide-react";
+import * as motion from "motion/react-client";
 import { steps } from "../content/home";
 
+const icons = [ShoppingCart, ListChecks, CalendarClock];
+const viewport = { once: true, amount: 0.25 };
+const ease = [0.22, 1, 0.36, 1] as const;
+
 export default function OfferSteps() {
-  const list = useRef<HTMLOListElement>(null);
-
-  useEffect(() => {
-    const root = list.current;
-    if (!root || !("IntersectionObserver" in window)) return;
-    const mobile = matchMedia("(max-width: 700px)");
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-    const rows = Array.from(root.children);
-    const seen = new Set<Element>();
-    let observer: IntersectionObserver;
-
-    function watch() {
-      observer?.disconnect();
-      const pending = rows.filter(row => !seen.has(row));
-      if (reduced.matches) {
-        pending.forEach(row => { seen.add(row); row.removeAttribute("data-waiting"); });
-        return;
-      }
-      pending.forEach(row => row.setAttribute("data-waiting", ""));
-      observer = new IntersectionObserver(entries => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const visible = entry.target === root ? pending : [entry.target];
-          for (const row of visible) {
-            seen.add(row);
-            row.removeAttribute("data-waiting");
-          }
-          observer.unobserve(entry.target);
-        }
-      }, { threshold: 0.12 });
-      if (mobile.matches) pending.forEach(row => observer.observe(row));
-      else if (pending.length && root) observer.observe(root);
-    }
-    watch();
-    mobile.addEventListener("change", watch);
-    reduced.addEventListener("change", watch);
-    return () => {
-      observer?.disconnect();
-      mobile.removeEventListener("change", watch);
-      reduced.removeEventListener("change", watch);
-      rows.forEach(row => row.removeAttribute("data-waiting"));
-    };
-  }, []);
-
-  return <ol ref={list} className="steps">
-    {steps.map(item => <li key={item.title}>
-      <div className="step-body"><h3>{item.title}</h3><p>{item.text}</p></div>
-    </li>)}
-  </ol>;
+  return (
+    <div className="offer-timeline">
+      <motion.div
+        className="offer-timeline-line motion-reduce:transform-none!"
+        aria-hidden="true"
+        initial={{ scaleY: 0 }}
+        whileInView={{ scaleY: 1 }}
+        viewport={viewport}
+        transition={{ duration: 1.05, ease: "easeInOut" }}
+      />
+      <ol className="offer-timeline-list" role="list">
+        {steps.map((step, index) => {
+          const Icon = icons[index];
+          return (
+            <motion.li
+              className="offer-timeline-step motion-reduce:opacity-100! motion-reduce:transform-none!"
+              key={step.title}
+              initial={{ opacity: 0, y: -14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={viewport}
+              transition={{ duration: 0.46, delay: index * 0.22, ease }}
+            >
+              <span className="offer-step-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+              <div className="offer-step-card">
+                <span className="offer-step-icon"><Icon aria-hidden="true" /></span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </div>
+              </div>
+            </motion.li>
+          );
+        })}
+      </ol>
+    </div>
+  );
 }

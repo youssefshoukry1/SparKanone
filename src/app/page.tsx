@@ -2,8 +2,10 @@ import HomeFaq from "../components/HomeFaq";
 import { HeroLogo } from "../components/HomeArtwork";
 import HeroMotion from "../components/HeroMotion";
 import SavingsConcepts from "../components/SavingsConcepts";
+import OfferChoice from "../components/OfferChoice";
 import OfferSteps from "../components/OfferSteps";
 import SavingsCalculator from "../components/SavingsCalculator";
+import { Typewriter } from "../components/ui/typewriter";
 import { GroceryStory, ShoppingStory, TravelStory, StoryOverview, ReceiptGuide, PrizeDrawGuide } from "../components/SavingsStories";
 
 
@@ -14,7 +16,8 @@ export default function Home() {
       <HeroMotion />
       <div className="wrap hero-grid">
         <div><h1>Mehr sparen.<br /><em>Mehr erleben.</em></h1>
-          <p>Rabatt, Cashback oder Gutschein? Entdecken Sie, wie sich Sparvorteile unterscheiden und worauf es beim Einkauf ankommt.</p>
+          <p className="hero-typewriter"><Typewriter words={["Beim Online-Einkauf sparen", "Im Supermarkt sparen", "Auf Reisen sparen"]} /></p>
+          <p className="hero-description">Rabatt, Cashback oder Gutschein? Entdecken Sie, wie sich Sparvorteile unterscheiden und worauf es beim Einkauf ankommt.</p>
           <a className="button" href="#ueberblick">SparKanone kennenlernen</a>
         </div>
         <HeroLogo />
@@ -28,7 +31,17 @@ export default function Home() {
     <GroceryStory />
     <ReceiptGuide />
     <SavingsConcepts />
-    <section className="section" id="ablauf"><div className="wrap split"><h2>So prüfen Sie<br />ein Angebot</h2><OfferSteps /></div></section>
+    <OfferChoice />
+    <section className="section offer-guide" id="ablauf" aria-labelledby="offer-title">
+      <div className="wrap offer-layout">
+        <div className="offer-intro">
+          <h2 id="offer-title">So prüfen Sie ein Angebot</h2>
+          <p>Ein klarer Leitfaden für bessere Entscheidungen.</p>
+          <a className="button offer-link" href="#vorteile">Sparbeispiele entdecken <ArrowRight size={20} aria-hidden="true" /></a>
+        </div>
+        <OfferSteps />
+      </div>
+    </section>
     <section className="wrap example"><h2>Warum SparKanone?</h2><p>Wir erklären Sparbegriffe anhand von Alltagssituationen. So können Sie selbst einschätzen, ob sich ein Angebot für Sie lohnt.</p></section>
     <TravelStory />
     <PrizeDrawGuide />
@@ -37,3 +50,4 @@ export default function Home() {
     <section className="closing"><div className="wrap"><h2>Was steckt hinter<br />dem Sparvorteil?</h2><a className="button" href="#vorteile">Sparvorteile vergleichen</a></div></section>
   </main>;
 }
+import { ArrowRight } from "lucide-react";

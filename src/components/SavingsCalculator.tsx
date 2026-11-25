@@ -2,6 +2,8 @@
 
 import { useId, useState, type CSSProperties } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { Coins, Percent } from "lucide-react";
+import styles from "./SavingsCalculator.module.css";
 
 const rates = [3, 5] as const;
 const minSpending = 500;
@@ -20,41 +22,41 @@ export default function SavingsCalculator() {
   const [rate, setRate] = useState<(typeof rates)[number]>(3);
   const annualCashback = spending * rate * 12 / 100;
   const spendingProgress = (spending - minSpending) / (maxSpending - minSpending) * 100;
+  const thumbOffset = 22 - spendingProgress * 0.44;
   const trackStyle = {
-    "--spending-track": `linear-gradient(to right, #ADD266 ${spendingProgress}%, #D4DBCC ${spendingProgress}%)`,
+    "--spending-position": `calc(${spendingProgress}% + (${thumbOffset}px))`,
+    "--spending-track": "linear-gradient(to right, #0b2f1d var(--spending-position), #e8e4d2 var(--spending-position))",
   } as CSSProperties;
 
   return (
     <section className="pt-3 pb-16 text-[#0B2F1D]" aria-labelledby={`${id}-title`}>
       <motion.div
-        className="wrap mx-auto max-w-5xl rounded-2xl bg-[#F8F7E9] px-5 py-8 shadow-[0_12px_32px_rgba(11,47,29,0.08)] sm:p-12 motion-reduce:transform-none! motion-reduce:opacity-100!"
+        className="wrap mx-auto max-w-[912px] rounded-[22px] bg-[#F8F7E9] px-5 py-8 shadow-[0_10px_24px_#0b2f1d1f] sm:p-11 motion-reduce:transform-none! motion-reduce:opacity-100!"
         initial={reducedMotion ? false : { opacity: 0, y: 20 }}
         animate={reducedMotion ? { opacity: 1, y: 0 } : undefined}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: reducedMotion ? 0 : 0.45, ease: "easeOut" }}
       >
-        <h2 id={`${id}-title`} className="text-center">Dein Sparpotenzial</h2>
+        <h2 id={`${id}-title`} className="text-center text-[clamp(1.9rem,4vw,3rem)]!">Dein Sparpotenzial</h2>
 
         <div className="mt-8 grid gap-8 md:grid-cols-2 md:items-center">
           <div className="grid min-w-0 gap-6 font-semibold">
             <div>
-              <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                <label htmlFor={`${id}-spending`}>Monatliche Ausgaben</label>
-                <span className="tabular-nums" aria-hidden="true">{euros.format(spending)}</span>
+              <label className="block pb-10" htmlFor={`${id}-spending`}>Monatliche Ausgaben</label>
+              <div className={styles.slider} style={trackStyle}>
+                <span className={styles.bubble} aria-hidden="true">{euros.format(spending)}</span>
+                <input
+                  id={`${id}-spending`}
+                  type="range"
+                  min={minSpending}
+                  max={maxSpending}
+                  step={50}
+                  value={spending}
+                  aria-valuetext={euros.format(spending)}
+                  onChange={event => setSpending(event.currentTarget.valueAsNumber)}
+                />
               </div>
-              <input
-                className="my-1 block h-11 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:[background:var(--spending-track)] [&::-webkit-slider-thumb]:-mt-2 [&::-webkit-slider-thumb]:size-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#0B2F1D] [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:[background:var(--spending-track)] [&::-moz-range-thumb]:size-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-[#0B2F1D]"
-                style={trackStyle}
-                id={`${id}-spending`}
-                type="range"
-                min={minSpending}
-                max={maxSpending}
-                step={50}
-                value={spending}
-                aria-valuetext={euros.format(spending)}
-                onChange={event => setSpending(event.currentTarget.valueAsNumber)}
-              />
               <div className="flex justify-between gap-2 text-sm text-[#536557]" aria-hidden="true">
                 <span>{euros.format(minSpending)}</span>
                 <span>{euros.format(maxSpending)}</span>
@@ -74,7 +76,7 @@ export default function SavingsCalculator() {
                       checked={rate === option}
                       onChange={() => setRate(option)}
                     />
-                    <span className="grid min-h-11 min-w-16 place-items-center rounded-lg border border-[#A6B5A0] px-3 peer-checked:border-[#0B2F1D] peer-checked:bg-[#ADD266] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-[#0B2F1D] motion-safe:transition-colors">
+                    <span className="grid min-h-11 min-w-16 place-items-center rounded-lg border border-[#A6B5A0] bg-white px-3 peer-checked:border-[#0B2F1D] peer-checked:bg-[#ADD266] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-[#0B2F1D] motion-safe:transition-colors">
                       {option} %
                     </span>
                   </label>
@@ -83,12 +85,15 @@ export default function SavingsCalculator() {
             </fieldset>
           </div>
 
-          <div className="min-w-0 rounded-2xl bg-[#EAF2D6] px-3 py-8 text-center">
-            <span id={`${id}-result`} className="font-semibold">Beispielhaftes Cashback pro Jahr</span>
+          <div className="relative isolate min-w-0 overflow-hidden rounded-2xl bg-[#0B2F1D] px-3 py-9 text-center text-white">
+            <Percent className="pointer-events-none absolute -right-4 -top-4 -z-10 size-24 rounded-full border-2 p-4 text-lime-100/10" aria-hidden="true" />
+            <Percent className="pointer-events-none absolute -bottom-5 -left-3 -z-10 size-20 rounded-full border-2 p-3 text-lime-100/10" aria-hidden="true" />
+            <Coins className="pointer-events-none absolute top-5 left-5 -z-10 size-8 text-lime-100/10" aria-hidden="true" />
+            <span id={`${id}-result`} className="font-medium">Beispielhaftes Cashback pro Jahr</span>
             <output
               aria-labelledby={`${id}-result`}
               htmlFor={`${id}-spending`}
-              className="mt-2 block text-5xl font-bold text-[#0B2F1D] tabular-nums"
+              className="mt-2 block text-5xl font-bold text-[#ADD266] tabular-nums"
             >
               <motion.span
                 key={annualCashback}

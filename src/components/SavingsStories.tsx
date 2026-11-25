@@ -1,6 +1,9 @@
 import Image from "next/image";
 import * as motion from "motion/react-client";
-import { BedDouble, BusFront, Luggage, Plane } from "lucide-react";
+import PrizeDrawPhoto from "./PrizeDrawPhoto";
+import ReceiptTimeline from "./ReceiptTimeline";
+import GroceryStoryMedia from "./GroceryStoryMedia";
+import { ArrowRight, BedDouble, BusFront, CalendarClock, ChevronRight, Gift, Luggage, Plane, UserRoundCheck } from "lucide-react";
 import groceries from "../images/groceries.webp";
 import groceriesMobile from "../images/groceries-mobile.webp";
 import onlineArt from "../images/topic-online.webp";
@@ -26,25 +29,77 @@ function StoryPhoto({ photo, mobile, alt }: { photo: StaticImageData; mobile: St
 }
 
 const topics = [
-  { title: "Online einkaufen", detail: "Was ein Gutschein nach Abzug der Versandkosten bringt.", image: onlineArt, prop: voucher, href: "#online-einkauf" },
-  { title: "Im Supermarkt", detail: "Welche Ersparnis auf dem Kassenbon ankommt.", image: marketArt, prop: tomato, href: "#einkauf" },
-  { title: "Auf Reisen", detail: "Welche Kosten zum Flugpreis dazukommen.", image: tripArt, prop: suitcase, href: "#kurztrip" },
+  { title: "Online einkaufen", detail: "Was ein Gutschein nach Abzug der Versandkosten bringt.", image: onlineArt, prop: voucher, href: "#online-einkauf", action: "Gutscheinbeispiel ansehen" },
+  { title: "Im Supermarkt", detail: "Welche Ersparnis auf dem Kassenbon ankommt.", image: marketArt, prop: tomato, href: "#einkauf", action: "Sparbeispiel ansehen" },
+  { title: "Auf Reisen", detail: "Welche Kosten zum Flugpreis dazukommen.", image: tripArt, prop: suitcase, href: "#kurztrip", action: "Reisekosten vergleichen" },
 ];
+
+const topicsHeading = "Wo möchten Sie sparen?";
 
 export function StoryOverview() {
   return (
-    <section className="section tint" id="vorteile" aria-labelledby="themen">
+    <section className="section topics-section" id="vorteile" aria-labelledby="themen">
       <div className="wrap">
-        <h2 id="themen">Wo möchten Sie sparen?</h2>
+        <h2 id="themen">
+          <span className="sr-only">{topicsHeading}</span>
+          <motion.span
+            aria-hidden="true"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.5 }}
+          >
+            {topicsHeading.split(" ").map((word, index, words) => {
+              const offset = words.slice(0, index).reduce((length, previous) => length + previous.length, 0);
+
+              return (
+                <span key={word}>
+                  {index > 0 && " "}
+                  <span className="inline-block">
+                    {Array.from(word, (letter, letterIndex) => (
+                      <motion.span
+                        key={letterIndex}
+                        className="inline-block motion-reduce:opacity-100! motion-reduce:filter-none!"
+                        variants={{
+                          hidden: { opacity: 0, filter: "blur(6px)" },
+                          visible: {
+                            opacity: 1,
+                            filter: "blur(0px)",
+                            transition: { duration: 0.42, delay: (offset + letterIndex) * 0.045, ease: "easeOut" },
+                          },
+                        }}
+                      >
+                        {letter}
+                      </motion.span>
+                    ))}
+                  </span>
+                </span>
+              );
+            })}
+          </motion.span>
+        </h2>
         <div className="topic-grid">
-          {topics.map(topic => (
-            <a key={topic.href} className="topic-card" href={topic.href}>
+          {topics.map((topic, index) => (
+            <motion.a
+              key={topic.href}
+              className="topic-card motion-reduce:opacity-100! motion-reduce:transform-none!"
+              href={topic.href}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.55, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+            >
               <span className="topic-art" aria-hidden="true">
                 <Image src={topic.image} alt="" unoptimized />
                 <Image className="topic-prop" src={topic.prop} alt="" unoptimized />
               </span>
-              <div><h3>{topic.title}</h3><p>{topic.detail}</p></div>
-            </a>
+              <div className="topic-copy">
+                <h3>{topic.title}</h3>
+                <p>{topic.detail}</p>
+                <span className="topic-action" aria-hidden="true">
+                  {topic.action}<ArrowRight size={22} />
+                </span>
+              </div>
+            </motion.a>
           ))}
         </div>
       </div>
@@ -62,7 +117,9 @@ export function GroceryStory() {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.65, ease: "easeOut" }}
     >
-      <StoryPhoto photo={groceries} mobile={groceriesMobile} alt="Zwei Menschen wählen in der Obstabteilung eines Supermarkts Äpfel aus." />
+      <GroceryStoryMedia>
+        <StoryPhoto photo={groceries} mobile={groceriesMobile} alt="Zwei Menschen wählen in der Obstabteilung eines Supermarkts Äpfel aus." />
+      </GroceryStoryMedia>
       <div className="grocery-copy">
         <h2 id="einkauf">Was bleibt nach dem Einkauf übrig?</h2>
         <p>Auf dem Kassenbon sehen Sie, welche Rabatte abgezogen wurden. Vergleichen Sie den Betrag mit Ihrem Wochenbudget.</p>
@@ -187,76 +244,50 @@ export function ReceiptGuide() {
       <div>
         <h2 id="bon-titel">Wenn der Kassenbon als Nachweis zählt</h2>
         <p>Manche Cashback-Aktionen verlangen einen Kaufbeleg. Ein Blick in die Aktionsbedingungen vor dem Einkauf erspart Ihnen später die Suche nach dem richtigen Nachweis.</p>
-        <ul className="receipt-tips">
-          <li><strong>Vor dem Kauf</strong> Prüfen Sie, welche Produkte, Händler und Kaufzeiträume zur Aktion gehören.</li>
-          <li><strong>Beim Fotografieren</strong> Legen Sie den Bon flach hin. Händler, Kaufdatum, Artikel und Betrag sollten lesbar sein.</li>
-          <li><strong>Vor dem Einreichen</strong> Prüfen Sie Einsendefrist, Dateiformat und Einreichungsweg beim Veranstalter.</li>
-        </ul>
+        <ReceiptTimeline />
       </div>
-      <StoryPhoto photo={receipt} mobile={receiptMobile} alt="Eine Käuferin fotografiert ihren Kassenbon mit dem Smartphone." />
+      <figure className="receipt-photo">
+        <StoryPhoto photo={receipt} mobile={receiptMobile} alt="Eine Käuferin fotografiert ihren Kassenbon mit dem Smartphone." />
+        <span className="receipt-scan-screen" aria-hidden="true"><span /></span>
+      </figure>
     </motion.section>
   );
 }
 
 const drawQuestions = [
-  ["Wer darf mitmachen?", "Achten Sie auf Mindestalter, Wohnort und eine mögliche Mitgliedschaft."],
-  ["Was umfasst der Gewinn?", "Bei einer verlosten Reise können etwa Anreise oder Verpflegung extra kosten."],
-  ["Wann fällt die Entscheidung?", "Suchen Sie nach Teilnahmeschluss, Auslosung und dem Weg, auf dem Gewinner benachrichtigt werden."],
+  [UserRoundCheck, "Wer darf mitmachen?", "Achten Sie auf Mindestalter, Wohnort und eine mögliche Mitgliedschaft."],
+  [Gift, "Was umfasst der Gewinn?", "Bei einer verlosten Reise können etwa Anreise oder Verpflegung extra kosten."],
+  [CalendarClock, "Wann fällt die Entscheidung?", "Suchen Sie nach Teilnahmeschluss, Auslosung und dem Weg, auf dem Gewinner benachrichtigt werden."],
 ] as const;
-
-const drawEase = [0.22, 1, 0.36, 1] as const;
 
 export function PrizeDrawGuide() {
   return (
-    <motion.section
-      id="gewinnspiele"
-      aria-labelledby="los-titel"
-      className="wrap draw-guide motion-reduce:transform-none! motion-reduce:opacity-100!"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={{
-        hidden: { opacity: 0, scale: 0.95 },
-        visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: drawEase } },
-      }}
-    >
-      <motion.figure
-        className="draw-photo motion-reduce:transform-none! motion-reduce:opacity-100!"
-        variants={{
-          hidden: { opacity: 0, x: -28 },
-          visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: drawEase } },
-        }}
-      >
-        <StoryPhoto photo={draw} mobile={drawMobile} alt="Eine Frau zieht bei einer Verlosung ein gefaltetes Los aus einer Glasschale." />
-      </motion.figure>
-      <div>
-        <motion.h2
-          id="los-titel"
-          className="motion-reduce:transform-none! motion-reduce:opacity-100!"
-          variants={{
-            hidden: { opacity: 0, y: 12 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.2, ease: drawEase } },
-          }}
-        >
-          Was steckt im Lostopf?
-        </motion.h2>
-        <p>Bei einem Gewinnspiel lohnt sich ein Blick ins Kleingedruckte. Diese drei Fragen helfen bei der Entscheidung.</p>
-        <dl className="draw-questions">
-          {drawQuestions.map(([question, answer], index) => (
-            <motion.div
-              key={question}
-              className="motion-reduce:transform-none! motion-reduce:opacity-100!"
-              variants={{
-                hidden: { opacity: 0, x: 18 },
-                visible: { opacity: 1, x: 0, transition: { duration: 0.75, delay: 0.35 + index * 0.15, ease: drawEase } },
-              }}
-            >
-              <dt>{question}</dt>
-              <dd>{answer}</dd>
-            </motion.div>
-          ))}
-        </dl>
+    <section id="gewinnspiele" aria-labelledby="los-titel" className="section draw-guide">
+      <div className="wrap draw-layout">
+        <PrizeDrawPhoto>
+          <StoryPhoto photo={draw} mobile={drawMobile} alt="Eine Frau zieht bei einer Verlosung ein gefaltetes Los aus einer Glasschale." />
+        </PrizeDrawPhoto>
+        <div className="draw-copy">
+          <h2 id="los-titel">Was steckt im Lostopf?</h2>
+          <p>Bei einem Gewinnspiel lohnt sich ein Blick ins Kleingedruckte. Diese drei Fragen helfen bei der Entscheidung.</p>
+          <dl className="draw-questions">
+            {drawQuestions.map(([Icon, question, answer], index) => (
+              <motion.div
+                className="draw-question motion-reduce:opacity-100! motion-reduce:transform-none!"
+                key={question}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.15, ease: "easeOut" }}
+              >
+                <dt><Icon aria-hidden="true" />{question}</dt>
+                <dd>{answer}</dd>
+              </motion.div>
+            ))}
+          </dl>
+          <a className="button draw-details" href="#fragen">Mehr Details erfahren <ChevronRight size={18} aria-hidden="true" /></a>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

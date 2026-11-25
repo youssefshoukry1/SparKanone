@@ -6,6 +6,7 @@ import { concepts } from "../content/home";
 
 const icons = [BadgePercent, Wallet, Ticket];
 const viewport = { once: true, amount: 0.5 };
+const cardOffsets = ["60%", "0%", "-60%"];
 
 export default function SavingsConcepts() {
   const reducedMotion = useReducedMotion();
@@ -25,11 +26,19 @@ export default function SavingsConcepts() {
           Drei Arten zu sparen
         </motion.h2>
         <p>Diese Begriffe begegnen Ihnen beim Vergleich von Angeboten.</p>
-        <div className="cards">
+        <div className="cards savings-concept-cards">
           {concepts.map((item, index) => {
             const Icon = icons[index];
             return (
-              <article key={item.title}>
+              <motion.article
+                key={item.title}
+                className="savings-concept-card motion-reduce:transform-none! motion-reduce:opacity-100!"
+                initial={reducedMotion ? false : { x: cardOffsets[index], y: 12, opacity: 0 }}
+                animate={reducedMotion ? { x: "0%", y: 0, opacity: 1 } : undefined}
+                whileInView={reducedMotion ? undefined : { x: "0%", y: 0, opacity: 1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: reducedMotion ? 0 : 0.7, delay: index === 1 ? 0 : 0.08, ease: [0.22, 1, 0.36, 1] }}
+              >
                 <motion.div
                   className="card-icon motion-reduce:transform-none!"
                   aria-hidden="true"
@@ -41,7 +50,7 @@ export default function SavingsConcepts() {
                 </motion.div>
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
-              </article>
+              </motion.article>
             );
           })}
         </div>
